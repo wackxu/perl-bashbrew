@@ -184,6 +184,7 @@ Mojo::Promise->map({ concurrency => 8 }, sub ($img) {
 			split /\n/, bashbrew('list', $ref->repo_name)
 		)
 	);
+
 	return Mojo::Promise->resolve unless @refs; # no tags, nothing to do! (opensuse, etc)
 
 	return Mojo::Promise->map({ concurrency => 1 }, sub ($ref) {
@@ -195,6 +196,7 @@ Mojo::Promise->map({ concurrency => 8 }, sub ($img) {
 
 		return Mojo::Promise->map({ concurrency => 1 }, sub ($archData) {
 			my ($arch, $archNamespace) = split /=/, $archData;
+
 			die "missing arch namespace for '$arch'" unless $archNamespace;
 			my $archRef = Bashbrew::RemoteImageRef->new($archNamespace . '/' . $ref->repo_name . ':' . $ref->tag);
 			die "'$archRef' registry does not match '$ref' registry" unless $archRef->registry_host eq $ref->registry_host;
@@ -202,6 +204,7 @@ Mojo::Promise->map({ concurrency => 8 }, sub ($img) {
 		}, @arches)->then(sub (@archResponses) {
 			my @manifestListItems;
 			my @neededArtifactPromises;
+
 			for my $archResponse (@archResponses) {
 				next unless @$archResponse;
 				my ($archRef, $manifestListItems) = @$archResponse;
@@ -258,6 +261,7 @@ Mojo::Promise->map({ concurrency => 8 }, sub ($img) {
 						elsif ($type eq 'manifest') {
 							push @putManifestPromises, sub { $ua->get_manifest_p($artifactRef)->then(sub ($manifestData = undef) {
 								return unless $manifestData;
+
 								return $ua->authenticated_registry_req_p(
 									PUT => $ref,
 									'repository:' . $ref->repo . ':push',

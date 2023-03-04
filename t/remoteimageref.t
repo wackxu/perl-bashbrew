@@ -324,30 +324,30 @@ my @distributionNormalizeTestcases = (
 	{
 		RemoteName =>    'fooo/bar',
 		FamiliarName =>  'fooo/bar',
-		FullName =>      'docker.io/fooo/bar',
-		AmbiguousName => 'index.docker.io/fooo/bar',
-		Domain =>        'docker.io',
+		FullName =>      'testhub.com/fooo/bar',
+		AmbiguousName => 'index.testhub.com/fooo/bar',
+		Domain =>        'testhub.com',
 	},
 	{
 		RemoteName =>    'library/ubuntu',
 		FamiliarName =>  'ubuntu',
-		FullName =>      'docker.io/library/ubuntu',
+		FullName =>      'testhub.com/library/ubuntu',
 		AmbiguousName => 'library/ubuntu',
-		Domain =>        'docker.io',
+		Domain =>        'testhub.com',
 	},
 	{
 		RemoteName =>    'nonlibrary/ubuntu',
 		FamiliarName =>  'nonlibrary/ubuntu',
-		FullName =>      'docker.io/nonlibrary/ubuntu',
+		FullName =>      'testhub.com/nonlibrary/ubuntu',
 		AmbiguousName => '',
-		Domain =>        'docker.io',
+		Domain =>        'testhub.com',
 	},
 	{
 		RemoteName =>    'other/library',
 		FamiliarName =>  'other/library',
-		FullName =>      'docker.io/other/library',
+		FullName =>      'testhub.com/other/library',
 		AmbiguousName => '',
-		Domain =>        'docker.io',
+		Domain =>        'testhub.com',
 	},
 	{
 		RemoteName =>    'private/moonbase',
@@ -394,30 +394,30 @@ my @distributionNormalizeTestcases = (
 	{
 		RemoteName =>    'library/ubuntu-12.04-base',
 		FamiliarName =>  'ubuntu-12.04-base',
-		FullName =>      'docker.io/library/ubuntu-12.04-base',
-		AmbiguousName => 'index.docker.io/library/ubuntu-12.04-base',
-		Domain =>        'docker.io',
+		FullName =>      'testhub.com/library/ubuntu-12.04-base',
+		AmbiguousName => 'index.testhub.com/library/ubuntu-12.04-base',
+		Domain =>        'testhub.com',
 	},
 	{
 		RemoteName =>    'library/foo',
 		FamiliarName =>  'foo',
-		FullName =>      'docker.io/library/foo',
-		AmbiguousName => 'docker.io/foo',
-		Domain =>        'docker.io',
+		FullName =>      'testhub.com/library/foo',
+		AmbiguousName => 'testhub.com/foo',
+		Domain =>        'testhub.com',
 	},
 	{
 		RemoteName =>    'library/foo/bar',
 		FamiliarName =>  'library/foo/bar',
-		FullName =>      'docker.io/library/foo/bar',
+		FullName =>      'testhub.com/library/foo/bar',
 		AmbiguousName => '',
-		Domain =>        'docker.io',
+		Domain =>        'testhub.com',
 	},
 	{
 		RemoteName =>    'store/foo/bar',
 		FamiliarName =>  'store/foo/bar',
-		FullName =>      'docker.io/store/foo/bar',
+		FullName =>      'testhub.com/store/foo/bar',
 		AmbiguousName => '',
-		Domain =>        'docker.io',
+		Domain =>        'testhub.com',
 	},
 );
 for my $testcase (@distributionNormalizeTestcases) {
@@ -436,47 +436,47 @@ my @distributionNormalizeRefTestcases = (
 	{
 		name =>     'nothing',
 		input =>    'busybox',
-		expected => 'docker.io/library/busybox:latest',
+		expected => 'testhub.com/library/busybox:latest',
 	},
 	{
 		name =>     'tag only',
 		input =>    'busybox:latest',
-		expected => 'docker.io/library/busybox:latest',
+		expected => 'testhub.com/library/busybox:latest',
 	},
 	{
 		name =>     'digest only',
 		input =>    'busybox@sha256:e6693c20186f837fc393390135d8a598a96a833917917789d63766cab6c59582',
-		expected => 'docker.io/library/busybox@sha256:e6693c20186f837fc393390135d8a598a96a833917917789d63766cab6c59582',
+		expected => 'testhub.com/library/busybox@sha256:e6693c20186f837fc393390135d8a598a96a833917917789d63766cab6c59582',
 	},
 	{
 		name =>     'path only',
 		input =>    'library/busybox',
-		expected => 'docker.io/library/busybox:latest',
+		expected => 'testhub.com/library/busybox:latest',
 	},
 	{
 		name =>     'hostname only',
-		input =>    'docker.io/busybox',
-		expected => 'docker.io/library/busybox:latest',
+		input =>    'testhub.com/busybox',
+		expected => 'testhub.com/library/busybox:latest',
 	},
 	{
 		name =>     'no tag',
-		input =>    'docker.io/library/busybox',
-		expected => 'docker.io/library/busybox:latest',
+		input =>    'testhub.com/library/busybox',
+		expected => 'testhub.com/library/busybox:latest',
 	},
 	{
 		name =>     'no path',
-		input =>    'docker.io/busybox:latest',
-		expected => 'docker.io/library/busybox:latest',
+		input =>    'testhub.com/busybox:latest',
+		expected => 'testhub.com/library/busybox:latest',
 	},
 	{
 		name =>     'no hostname',
 		input =>    'library/busybox:latest',
-		expected => 'docker.io/library/busybox:latest',
+		expected => 'testhub.com/library/busybox:latest',
 	},
 	{
 		name =>     'full reference with tag',
-		input =>    'docker.io/library/busybox:latest',
-		expected => 'docker.io/library/busybox:latest',
+		input =>    'testhub.com/library/busybox:latest',
+		expected => 'testhub.com/library/busybox:latest',
 	},
 	{
 		name =>     'gcr reference without tag',
@@ -508,9 +508,9 @@ is $clone->to_string, $input;
 # test/verify "registry_host"
 is $clone->registry_host, 'reg1.example.com';
 $clone->host(undef);
-is $clone->registry_host, 'registry-1.docker.io';
-$clone->host('docker.io');
-is $clone->registry_host, 'registry-1.docker.io';
+is $clone->registry_host, 'testhub.com';
+$clone->host('testhub.com');
+is $clone->registry_host, 'testhub.com';
 $clone->host('reg1.example.com');
 is $clone->registry_host, 'reg1.example.com';
 # "repo_name", "repo_org"

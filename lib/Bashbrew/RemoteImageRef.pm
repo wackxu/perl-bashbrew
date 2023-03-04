@@ -39,7 +39,7 @@ my $allowedDigestsRegexp = qr{
 	)$
 }x;
 
-our $DOCKER_HOST = 'docker.io';
+our $DOCKER_HOST = 'testhub.com';
 our $DOCKER_ORG = 'library';
 
 sub clone {
@@ -67,7 +67,7 @@ sub parse ($self, $ref) {
 		$host = undef;
 	}
 	# https://github.com/docker/distribution/blob/411d6bcfd2580d7ebe6e346359fa16aceec109d5/reference/normalize.go#L98-L100
-	if (($host // '') eq 'index.docker.io') {
+	if (($host // '') eq 'index.testhub.com') {
 		$host = undef;
 	}
 	$self->host($host);
@@ -78,6 +78,10 @@ sub parse ($self, $ref) {
 
 	return $self->repo($repo)->tag($tag)->digest($digest);
 }
+
+# repo: library/debian
+# repo_name: debian
+# registry_host: testhub.com
 
 sub canonical_host ($self) {
 	return lc($self->host // '') || $DOCKER_HOST;
@@ -150,7 +154,7 @@ sub to_canonical_string ($self) {
 # https://github.com/containerd/containerd/blob/7c1e88399ec0b0b077121d9d5ad97e647b11c870/remotes/docker/resolver.go#L102-L108
 sub registry_host ($self) {
 	if ($self->canonical_host eq $DOCKER_HOST) {
-		return 'registry-1.docker.io';
+		return 'testhub.com';
 	}
 	return $self->host;
 }
