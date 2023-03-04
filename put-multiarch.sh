@@ -17,8 +17,8 @@ args=(
 
 	--env DOCKERHUB_PUBLIC_PROXY
 
-	#--env MOJO_CLIENT_DEBUG=1
-	#--env MOJO_IOLOOP_DEBUG=1
+	--env MOJO_CLIENT_DEBUG=1
+	--env MOJO_IOLOOP_DEBUG=1
 
 	# localhost!
 	--network host

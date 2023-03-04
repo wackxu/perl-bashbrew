@@ -9,14 +9,17 @@ RUN set -eux; \
 	rm -rf /var/lib/apt/lists/*
 
 # https://github.com/docker-library/bashbrew/releases
-ENV BASHBREW_VERSION 0.1.3
+#ENV BASHBREW_VERSION 0.1.3
 RUN set -eux; \
-	wget -O /usr/local/bin/bashbrew-host-arch.sh "https://github.com/docker-library/bashbrew/raw/v${BASHBREW_VERSION}/scripts/bashbrew-host-arch.sh"; \
-	chmod +x /usr/local/bin/bashbrew-host-arch.sh; \
-	bashbrewArch="$(bashbrew-host-arch.sh)"; \
-	wget -O /usr/local/bin/bashbrew "https://github.com/docker-library/bashbrew/releases/download/v${BASHBREW_VERSION}/bashbrew-$bashbrewArch"; \
+	#wget -O /usr/local/bin/bashbrew-host-arch.sh "https://github.com/docker-library/bashbrew/raw/v${BASHBREW_VERSION}/scripts/bashbrew-host-arch.sh"; \
+	#chmod +x /usr/local/bin/bashbrew-host-arch.sh; \
+	#bashbrewArch="$(bashbrew-host-arch.sh)"; \
+	wget -O /usr/local/bin/bashbrew "https://github.com/wackxu/bashbrew/releases/download/1.10/bashbrew"; \
 	chmod +x /usr/local/bin/bashbrew; \
 	bashbrew --version
+
+#COPY /usr/local/bin/bashbrew /usr/local/bin/
+#RUN chmod +x /usr/local/bin/bashbrew
 
 # secure by default ♥ (thanks to sri!)
 ENV PERL_CPANM_OPT --verbose --mirror https://cpan.metacpan.org

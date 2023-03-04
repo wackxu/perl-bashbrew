@@ -25,10 +25,18 @@ GetOptions(
 $ua->insecure($insecureRegistry);
 
 # TODO make this "die" conditional based on whether we're actually targeting Docker Hub?
-$ua->hubProxy($ENV{DOCKERHUB_PUBLIC_PROXY} || die 'missing DOCKERHUB_PUBLIC_PROXY env (https://github.com/tianon/dockerhub-public-proxy)');
+$ua->hubProxy("http://192.168.0.196:3000");
+#|| die 'missing DOCKERHUB_PUBLIC_PROXY env (https://github.com/tianon/dockerhub-public-proxy)');
 
 # get list of manifest list items and necessary blobs for a particular architecture
 sub get_arch_p ($targetRef, $arch, $archRef) {
+        print "archRef repo_name: " . $archRef->repo_name . "\n";
+        print "archRef tag: " . $archRef->tag . "\n";
+        print "archRef registry_host: " . $archRef->registry_host . "\n";
+        print "archRef repo: " . $archRef->repo . "\n";
+        print "archRef canonical_repo: " . $archRef->canonical_repo . "\n";
+        print "archRef host: " . $archRef->host . "\n";
+        print "archRef docker name: " . $archRef->docker_name . "\n";
 	return $ua->get_manifest_p($archRef)->then(sub ($manifestData = undef) {
 		return unless $manifestData;
 		my ($mediaType, $digest, $size, $manifest) = (
@@ -175,6 +183,11 @@ Mojo::Promise->map({ concurrency => 8 }, sub ($img) {
 
 	my $ref = Bashbrew::RemoteImageRef->new($img);
 
+    print "imag: " . $img . " repo_name: " . $ref->repo_name . "\n";
+    print "tag: " . $ref->tag . "\n";
+    print "registry_host: " . $ref->registry_host . "\n";
+    print "repo: " . $ref->repo . "\n";
+
 	my @refs = (
 		$ref->tag
 		? ( $ref )
@@ -184,6 +197,9 @@ Mojo::Promise->map({ concurrency => 8 }, sub ($img) {
 			split /\n/, bashbrew('list', $ref->repo_name)
 		)
 	);
+
+	print "refs: " . join("\n",@refs) . "\n";
+
 	return Mojo::Promise->resolve unless @refs; # no tags, nothing to do! (opensuse, etc)
 
 	return Mojo::Promise->map({ concurrency => 1 }, sub ($ref) {
@@ -195,6 +211,9 @@ Mojo::Promise->map({ concurrency => 8 }, sub ($img) {
 
 		return Mojo::Promise->map({ concurrency => 1 }, sub ($archData) {
 			my ($arch, $archNamespace) = split /=/, $archData;
+            # arch amd64  archNamespace amd64
+			print "arch: " . $arch . " archNamespace" . $archNamespace . "\n";
+
 			die "missing arch namespace for '$arch'" unless $archNamespace;
 			my $archRef = Bashbrew::RemoteImageRef->new($archNamespace . '/' . $ref->repo_name . ':' . $ref->tag);
 			die "'$archRef' registry does not match '$ref' registry" unless $archRef->registry_host eq $ref->registry_host;
@@ -202,6 +221,9 @@ Mojo::Promise->map({ concurrency => 8 }, sub ($img) {
 		}, @arches)->then(sub (@archResponses) {
 			my @manifestListItems;
 			my @neededArtifactPromises;
+
+			print "archResponses: " . @archResponses . "\n";
+
 			for my $archResponse (@archResponses) {
 				next unless @$archResponse;
 				my ($archRef, $manifestListItems) = @$archResponse;
@@ -227,6 +249,7 @@ Mojo::Promise->map({ concurrency => 8 }, sub ($img) {
 				manifests => \@manifestListItems,
 			};
 			my $manifestListJson = Mojo::JSON::encode_json($manifestList);
+			print "manifestListJson: " . $manifestListJson . "\n";
 			my $manifestListDigest = 'sha256:' . Digest::SHA::sha256_hex($manifestListJson);
 
 			return $ua->head_manifest_p($ref->clone->digest($manifestListDigest))->then(sub ($exists) {
@@ -258,6 +281,9 @@ Mojo::Promise->map({ concurrency => 8 }, sub ($img) {
 						elsif ($type eq 'manifest') {
 							push @putManifestPromises, sub { $ua->get_manifest_p($artifactRef)->then(sub ($manifestData = undef) {
 								return unless $manifestData;
+
+								print "manifestData is not empty";
+
 								return $ua->authenticated_registry_req_p(
 									PUT => $ref,
 									'repository:' . $ref->repo . ':push',

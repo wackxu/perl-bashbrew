@@ -3,6 +3,7 @@ use Mojo::Base -base, -signatures;
 
 use Mojo::Promise;
 use Mojo::UserAgent;
+use Mojo::UserAgent::CookieJar;
 
 # https://github.com/tianon/dockerhub-public-proxy
 has hubProxy => ''; # "https://dockerhub-public-proxy.example.com"
@@ -13,7 +14,8 @@ has insecure => undef;
 has defaultRetries => 10;
 
 has ua => sub {
-	my $ua = Mojo::UserAgent->new->max_redirects(10)->connect_timeout(120)->inactivity_timeout(120);
+	my $ua = Mojo::UserAgent->new->max_redirects(10)->connect_timeout(120)->inactivity_timeout(120)->insecure(1);
+
 	$ua->transactor->name(join ' ',
 		# https://github.com/docker/docker/blob/v1.11.2/dockerversion/useragent.go#L13-L34
 		'docker/1.11.2',
@@ -24,6 +26,9 @@ has ua => sub {
 		'arch/amd64',
 		# BOGUS USER AGENTS FOR THE BOGUS USER AGENT THRONE
 	);
+
+    $ua->cookie_jar->ignore(sub { 1 });
+
 	return $ua;
 };
 
@@ -98,18 +103,26 @@ sub get_manifest_p ($self, $ref, $tries = $self->defaultRetries) {
 		return Mojo::Promise->resolve($cache{$ref->digest});
 	}
 
+	print "get_manifest_p request url: " . $self->ref_url($ref, 'manifests') . "\n";
+
 	return $self->_retry_simple_req_p($tries, GET => $self->ref_url($ref, 'manifests'), { Accept => $acceptHeader })->then(sub ($tx) {
+	    print "res code: " . $tx->res->code . "\n";
 		return if $tx->res->code == 404 || $tx->res->code == 401;
+
+		print "aaaaaaaa";
 
 		if (!$lastTry && $tx->res->code != 200) {
 			return $self->get_manifest_p($ref, $tries);
 		}
 		die "unexpected response code fetching '$ref': " . $tx->res->code . ' -- ' . $tx->res->message unless $tx->res->code == 200;
-
+        print "bbbbbbbb";
 		my $digest = $tx->res->headers->header('Docker-Content-Digest') or die "'$ref' is missing 'Docker-Content-Digest' header";
 		die "malformed 'docker-content-digest' header in '$ref': '$digest'" unless $digest =~ m!^sha256:!; # TODO reuse Bashbrew::RemoteImageRef digest validation
 
 		my $manifest = $tx->res->json or die "'$ref' has bad or missing JSON";
+
+		print "manifest" . $manifest . "\n";
+
 		my $size = int($tx->res->headers->content_length);
 		my $verbatim = $tx->res->body;
 
@@ -147,6 +160,8 @@ sub get_blob_p ($self, $ref, $tries = $self->defaultRetries) {
 		if (!$lastTry && $tx->res->code != 200) {
 			return $self->get_blob_p($ref, $tries);
 		}
+
+		print "get_blob_p";
 		die "unexpected response code fetching blob from '$ref': " . $tx->res->code . ' -- ' . $tx->res->message unless $tx->res->code == 200;
 
 		return $cache{$ref->digest} = $tx->res->json;
@@ -230,6 +245,10 @@ sub authenticated_registry_req_p ($self, $method, $ref, $scope, $url, $contentTy
 
 	my $methodP = lc($method) . '_p';
 	my $fullUrl = $self->ref_url($ref->clone->digest(undef)->tag(undef), undef, 1) . '/' . $url;
+
+
+    print "request url: " . $fullUrl . "\n";
+
 	return $self->ua->$methodP($fullUrl, \%headers, ($payload ? $payload : ()))->then(sub ($tx) {
 		if (!$lastTry && $tx->res->code == 401) {
 			# "Unauthorized" -- we must need to go fetch a token for this registry request (so let's go do that, then retry the original registry request)
@@ -260,6 +279,9 @@ sub authenticated_registry_req_p ($self, $method, $ref, $scope, $url, $contentTy
 				if (my $error = $tx->error) {
 					die "registry authentication error ('$url'): " . ($error->{code} ? $error->{code} . ' -- ' : '') . $error->{message};
 				}
+
+
+				print "auth REQUEST:\n" . $tx->req->headers->to_string . "\n\n" . $tx->req->body;
 
 				$tokens{$scope} = $tx->res->json->{token};
 				return $self->authenticated_registry_req_p($method, $ref, $scope, $url, $contentType, $payload, $tries);
