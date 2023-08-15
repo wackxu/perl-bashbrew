@@ -7,6 +7,12 @@ bashbrewLibrary="${BASHBREW_LIBRARY:-$HOME/docker/official-images/library}"
 dockerConfig="${DOCKER_CONFIG:-$HOME/.docker}"
 [ -s "$dockerConfig/config.json" ]
 
+echo "=========="
+echo $DOCKERHUB_PUBLIC_PROXY
+echo $REGISTRY_ADDRESS
+echo "=========="
+
+
 args=(
 	--mount "type=bind,src=$bashbrewLibrary,dst=/library,ro"
 	--env BASHBREW_LIBRARY=/library
