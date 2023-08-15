@@ -27,7 +27,7 @@ has ua => sub {
 		# BOGUS USER AGENTS FOR THE BOGUS USER AGENT THRONE
 	);
 
-    $ua->cookie_jar->ignore(sub { 1 });
+	$ua->cookie_jar->ignore(sub { 1 });
 
 	return $ua;
 };
@@ -104,7 +104,6 @@ sub get_manifest_p ($self, $ref, $tries = $self->defaultRetries) {
 	}
 
 	return $self->_retry_simple_req_p($tries, GET => $self->ref_url($ref, 'manifests'), { Accept => $acceptHeader })->then(sub ($tx) {
-	    print "res code: " . $tx->res->code . "\n";
 		return if $tx->res->code == 404 || $tx->res->code == 401;
 
 		if (!$lastTry && $tx->res->code != 200) {
@@ -115,7 +114,6 @@ sub get_manifest_p ($self, $ref, $tries = $self->defaultRetries) {
 		die "malformed 'docker-content-digest' header in '$ref': '$digest'" unless $digest =~ m!^sha256:!; # TODO reuse Bashbrew::RemoteImageRef digest validation
 
 		my $manifest = $tx->res->json or die "'$ref' has bad or missing JSON";
-
 		my $size = int($tx->res->headers->content_length);
 		my $verbatim = $tx->res->body;
 
@@ -153,7 +151,6 @@ sub get_blob_p ($self, $ref, $tries = $self->defaultRetries) {
 		if (!$lastTry && $tx->res->code != 200) {
 			return $self->get_blob_p($ref, $tries);
 		}
-
 		die "unexpected response code fetching blob from '$ref': " . $tx->res->code . ' -- ' . $tx->res->message unless $tx->res->code == 200;
 
 		return $cache{$ref->digest} = $tx->res->json;
@@ -237,7 +234,6 @@ sub authenticated_registry_req_p ($self, $method, $ref, $scope, $url, $contentTy
 
 	my $methodP = lc($method) . '_p';
 	my $fullUrl = $self->ref_url($ref->clone->digest(undef)->tag(undef), undef, 1) . '/' . $url;
-
 	return $self->ua->$methodP($fullUrl, \%headers, ($payload ? $payload : ()))->then(sub ($tx) {
 		if (!$lastTry && $tx->res->code == 401) {
 			# "Unauthorized" -- we must need to go fetch a token for this registry request (so let's go do that, then retry the original registry request)

@@ -4,6 +4,8 @@ use Test::More;
 
 require_ok('Bashbrew::RemoteImageRef');
 
+our $DOCKER_HOST = $ENV{REGISTRY_ADDRESS};
+
 my @distributionReferenceTestcases = (
 	# https://github.com/docker/distribution/blob/411d6bcfd2580d7ebe6e346359fa16aceec109d5/reference/reference_test.go#L31-L173
 	{
@@ -324,30 +326,30 @@ my @distributionNormalizeTestcases = (
 	{
 		RemoteName =>    'fooo/bar',
 		FamiliarName =>  'fooo/bar',
-		FullName =>      'testhub.com/fooo/bar',
-		AmbiguousName => 'index.testhub.com/fooo/bar',
-		Domain =>        'testhub.com',
+		FullName =>      $DOCKER_HOST . '/fooo/bar',
+		AmbiguousName => 'index.' . $DOCKER_HOST . '/fooo/bar',
+		Domain =>        $DOCKER_HOST,
 	},
 	{
 		RemoteName =>    'library/ubuntu',
 		FamiliarName =>  'ubuntu',
-		FullName =>      'testhub.com/library/ubuntu',
+		FullName =>      $DOCKER_HOST . '/library/ubuntu',
 		AmbiguousName => 'library/ubuntu',
-		Domain =>        'testhub.com',
+		Domain =>        $DOCKER_HOST,
 	},
 	{
 		RemoteName =>    'nonlibrary/ubuntu',
 		FamiliarName =>  'nonlibrary/ubuntu',
-		FullName =>      'testhub.com/nonlibrary/ubuntu',
+		FullName =>      $DOCKER_HOST . '/nonlibrary/ubuntu',
 		AmbiguousName => '',
-		Domain =>        'testhub.com',
+		Domain =>        $DOCKER_HOST,
 	},
 	{
 		RemoteName =>    'other/library',
 		FamiliarName =>  'other/library',
-		FullName =>      'testhub.com/other/library',
+		FullName =>      $DOCKER_HOST . '/other/library',
 		AmbiguousName => '',
-		Domain =>        'testhub.com',
+		Domain =>        $DOCKER_HOST,
 	},
 	{
 		RemoteName =>    'private/moonbase',
@@ -394,30 +396,30 @@ my @distributionNormalizeTestcases = (
 	{
 		RemoteName =>    'library/ubuntu-12.04-base',
 		FamiliarName =>  'ubuntu-12.04-base',
-		FullName =>      'testhub.com/library/ubuntu-12.04-base',
-		AmbiguousName => 'index.testhub.com/library/ubuntu-12.04-base',
-		Domain =>        'testhub.com',
+		FullName =>      $DOCKER_HOST . '/library/ubuntu-12.04-base',
+		AmbiguousName => 'index.' . $DOCKER_HOST . '/library/ubuntu-12.04-base',
+		Domain =>        $DOCKER_HOST,
 	},
 	{
 		RemoteName =>    'library/foo',
 		FamiliarName =>  'foo',
-		FullName =>      'testhub.com/library/foo',
-		AmbiguousName => 'testhub.com/foo',
-		Domain =>        'testhub.com',
+		FullName =>      $DOCKER_HOST . '/library/foo',
+		AmbiguousName => $DOCKER_HOST . '/foo',
+		Domain =>        $DOCKER_HOST,
 	},
 	{
 		RemoteName =>    'library/foo/bar',
 		FamiliarName =>  'library/foo/bar',
-		FullName =>      'testhub.com/library/foo/bar',
+		FullName =>      $DOCKER_HOST . '/library/foo/bar',
 		AmbiguousName => '',
-		Domain =>        'testhub.com',
+		Domain =>        $DOCKER_HOST,
 	},
 	{
 		RemoteName =>    'store/foo/bar',
 		FamiliarName =>  'store/foo/bar',
-		FullName =>      'testhub.com/store/foo/bar',
+		FullName =>      $DOCKER_HOST . '/store/foo/bar',
 		AmbiguousName => '',
-		Domain =>        'testhub.com',
+		Domain =>        $DOCKER_HOST,
 	},
 );
 for my $testcase (@distributionNormalizeTestcases) {
@@ -436,47 +438,47 @@ my @distributionNormalizeRefTestcases = (
 	{
 		name =>     'nothing',
 		input =>    'busybox',
-		expected => 'testhub.com/library/busybox:latest',
+		expected => $DOCKER_HOST . '/library/busybox:latest',
 	},
 	{
 		name =>     'tag only',
 		input =>    'busybox:latest',
-		expected => 'testhub.com/library/busybox:latest',
+		expected => $DOCKER_HOST . '/library/busybox:latest',
 	},
 	{
 		name =>     'digest only',
 		input =>    'busybox@sha256:e6693c20186f837fc393390135d8a598a96a833917917789d63766cab6c59582',
-		expected => 'testhub.com/library/busybox@sha256:e6693c20186f837fc393390135d8a598a96a833917917789d63766cab6c59582',
+		expected => $DOCKER_HOST . '/library/busybox@sha256:e6693c20186f837fc393390135d8a598a96a833917917789d63766cab6c59582',
 	},
 	{
 		name =>     'path only',
 		input =>    'library/busybox',
-		expected => 'testhub.com/library/busybox:latest',
+		expected => $DOCKER_HOST . '/library/busybox:latest',
 	},
 	{
 		name =>     'hostname only',
-		input =>    'testhub.com/busybox',
-		expected => 'testhub.com/library/busybox:latest',
+		input =>    $DOCKER_HOST . '/busybox',
+		expected => $DOCKER_HOST . '/library/busybox:latest',
 	},
 	{
 		name =>     'no tag',
-		input =>    'testhub.com/library/busybox',
-		expected => 'testhub.com/library/busybox:latest',
+		input =>    $DOCKER_HOST . '/library/busybox',
+		expected => $DOCKER_HOST . '/library/busybox:latest',
 	},
 	{
 		name =>     'no path',
-		input =>    'testhub.com/busybox:latest',
-		expected => 'testhub.com/library/busybox:latest',
+		input =>    $DOCKER_HOST . '/busybox:latest',
+		expected => $DOCKER_HOST . '/library/busybox:latest',
 	},
 	{
 		name =>     'no hostname',
 		input =>    'library/busybox:latest',
-		expected => 'testhub.com/library/busybox:latest',
+		expected => $DOCKER_HOST . '/library/busybox:latest',
 	},
 	{
 		name =>     'full reference with tag',
-		input =>    'testhub.com/library/busybox:latest',
-		expected => 'testhub.com/library/busybox:latest',
+		input =>    $DOCKER_HOST . '/library/busybox:latest',
+		expected => $DOCKER_HOST . '/library/busybox:latest',
 	},
 	{
 		name =>     'gcr reference without tag',
@@ -508,9 +510,9 @@ is $clone->to_string, $input;
 # test/verify "registry_host"
 is $clone->registry_host, 'reg1.example.com';
 $clone->host(undef);
-is $clone->registry_host, 'testhub.com';
-$clone->host('testhub.com');
-is $clone->registry_host, 'testhub.com';
+is $clone->registry_host, $DOCKER_HOST;
+$clone->host($DOCKER_HOST);
+is $clone->registry_host, $DOCKER_HOST;
 $clone->host('reg1.example.com');
 is $clone->registry_host, 'reg1.example.com';
 # "repo_name", "repo_org"

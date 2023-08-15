@@ -16,6 +16,7 @@ args=(
 	--env DOCKER_CONFIG='/.docker'
 
 	--env DOCKERHUB_PUBLIC_PROXY
+	--env REGISTRY_ADDRESS
 
 	--env MOJO_CLIENT_DEBUG=1
 	--env MOJO_IOLOOP_DEBUG=1

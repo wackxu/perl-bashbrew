@@ -39,7 +39,7 @@ my $allowedDigestsRegexp = qr{
 	)$
 }x;
 
-our $DOCKER_HOST = 'testhub.com';
+our $DOCKER_HOST = $ENV{REGISTRY_ADDRESS};
 our $DOCKER_ORG = 'library';
 
 sub clone {
@@ -154,7 +154,7 @@ sub to_canonical_string ($self) {
 # https://github.com/containerd/containerd/blob/7c1e88399ec0b0b077121d9d5ad97e647b11c870/remotes/docker/resolver.go#L102-L108
 sub registry_host ($self) {
 	if ($self->canonical_host eq $DOCKER_HOST) {
-		return 'testhub.com';
+		return $DOCKER_HOST;
 	}
 	return $self->host;
 }
