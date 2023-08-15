@@ -39,7 +39,7 @@ my $allowedDigestsRegexp = qr{
 	)$
 }x;
 
-our $DOCKER_HOST = $ENV{REGISTRY_ADDRESS};
+our $DOCKER_HOST = $ENV{'REGISTRY_ADDRESS'};
 our $DOCKER_ORG = 'library';
 
 sub clone {

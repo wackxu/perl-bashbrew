@@ -4,7 +4,7 @@ use Test::More;
 
 require_ok('Bashbrew::RemoteImageRef');
 
-our $DOCKER_HOST = $ENV{REGISTRY_ADDRESS};
+our $DOCKER_HOST = $ENV{'REGISTRY_ADDRESS'};
 
 my @distributionReferenceTestcases = (
 	# https://github.com/docker/distribution/blob/411d6bcfd2580d7ebe6e346359fa16aceec109d5/reference/reference_test.go#L31-L173
