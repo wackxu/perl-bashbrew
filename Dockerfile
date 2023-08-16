@@ -28,7 +28,7 @@ ENV PERL_CPANM_OPT --verbose --mirror https://cpan.metacpan.org
 # TODO find a way to make --verify work with backpan as well :'(
 #ENV PERL_CPANM_OPT $PERL_CPANM_OPT --verify
 
-ENV REGISTRY_ADDRESS testharbor.com
+ENV REGISTRY_ADDRESS ${REGISTRY_ADDRESS}
 
 # reinstall cpanm itself, for good measure
 RUN cpanm App::cpanminus

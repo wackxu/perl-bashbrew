@@ -67,7 +67,7 @@ sub parse ($self, $ref) {
 		$host = undef;
 	}
 	# https://github.com/docker/distribution/blob/411d6bcfd2580d7ebe6e346359fa16aceec109d5/reference/normalize.go#L98-L100
-	if (($host // '') eq 'index.testhub.com') {
+	if (($host // '') eq 'index.' . $DOCKER_HOST) {
 		$host = undef;
 	}
 	$self->host($host);

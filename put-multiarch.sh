@@ -39,7 +39,7 @@ if [ -t 0 ] && [ -t 1 ]; then
 fi
 
 dir="$(dirname "$BASH_SOURCE")"
-img="$(docker build -q -t oisupport/perl-bashbrew "$dir")"
+img="$(docker build -q -t oisupport/perl-bashbrew --build-arg REGISTRY_ADDRESS=${REGISTRY_ADDRESS} "$dir")"
 
 #exec docker run --rm "${args[@]}" "$img" perl -MCarp::Always bin/put-multiarch.pl "$@"
 exec docker run --rm "${args[@]}" "$img" bin/put-multiarch.pl "$@"
